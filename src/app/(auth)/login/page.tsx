@@ -1,46 +1,64 @@
 'use client';
-import FormRenderer from '@/components/dynamic-form/FormRenderer';
-import { LOGIN_FORM_META } from '@/constants/forms/auth';
-import { authService } from '@/services/auth.service';
+import { LOGIN_FORM_META } from '@/constants/auth-meta';
+import { useAuthStore } from '@/store/useAuthStore';
+import api from '@/lib/axios';
+import { useMutation } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import FormRenderer from '@/components/dynamic-form/FormRenderer';
+import Link from 'next/link'; // Import Link
 
 export default function LoginPage() {
   const router = useRouter();
-  const [error, setError] = useState('');
+  const setAuth = useAuthStore((state) => state.setAuth);
 
-  const handleLogin = async (formData: any) => {
-    try {
-      setError('');
-      await authService.login(formData);
-      
-      // Redirect ke dashboard setelah sukses
-      router.push('/dashboard');
-      router.refresh();
-    } catch (err: any) {
-      setError(err.response?.data?.message || 'Email atau password salah');
-    }
-  };
+  const mutation = useMutation({
+    mutationFn: async (data: any) => {
+      const res = await api.post('/auth/login', data);
+      return res.data;
+    },
+    onSuccess: (res) => {
+      console.log("Response Full API:", res); // Debug: Pastikan access_token ada di sini
+
+      const token = res.data.access_token;
+
+      if (token) {
+        // Panggil setAuth dari hook Zustand
+        setAuth(token, null);
+
+        // Beri jeda sangat singkat agar Zustand selesai menulis ke LocalStorage
+        // sebelum router pindah halaman
+        setTimeout(() => {
+          router.push('/store');
+        }, 100);
+      } else {
+        console.error("Token tidak ditemukan di response API!");
+      }
+    },
+    onError: (err: any) => alert(err.response?.data?.message || "Login Gagal")
+  });
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
-      <div className="max-w-md w-full p-8 bg-white rounded-2xl shadow-lg border border-gray-100">
-        <div className="text-center mb-8">
-          <h1 className="text-4xl font-black italic text-blue-600">KALNAF</h1>
-          <p className="text-gray-500 mt-2">Sistem Kasir Offline-First</p>
+    <div className="flex min-h-screen items-center justify-center bg-gray-50 p-4 font-sans">
+      <div className="w-full max-w-md space-y-6"> {/* Tambahkan space-y-6 */}
+        <FormRenderer
+          meta={LOGIN_FORM_META}
+          onSubmit={(data) => mutation.mutate(data)}
+          isLoading={mutation.isPending}
+          submitLabel="Masuk"
+        />
+
+        {/* Link Register dengan Style 2026 */}
+        <div className="text-center">
+          <p className="text-slate-500 text-sm">
+            Belum memiliki akun bisnis?{' '}
+            <Link
+              href="/register"
+              className="font-bold text-blue-600 hover:text-blue-700 transition-colors duration-200 underline-offset-4 hover:underline"
+            >
+              Daftar Sekarang
+            </Link>
+          </p>
         </div>
-
-        {error && (
-          <div className="mb-4 p-3 bg-red-50 text-red-600 text-sm rounded-lg border border-red-100">
-            {error}
-          </div>
-        )}
-
-        <FormRenderer meta={LOGIN_FORM_META} onSubmit={handleLogin} />
-        
-        <p className="mt-6 text-center text-sm text-gray-600">
-          Belum punya akun? <a href="/register" className="text-blue-600 font-bold">Daftar Toko</a>
-        </p>
       </div>
     </div>
   );

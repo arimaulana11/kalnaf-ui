@@ -1,5 +1,15 @@
-export type FieldType = 'text' | 'number' | 'select' | 'date'; 
- 
-export interface FormField { name: string; label: string; type: FieldType; required?: boolean; placeholder?: string; options?: { label: string; value: any }[]; } 
- 
-export interface FormMeta { moduleName: string; title: string; fields: FormField[]; } 
+export type FieldType = 'text' | 'email' | 'password' | 'number' | 'tel' | 'textarea' | 'select';
+
+export interface FormField {
+  name: string;
+  label: string;
+  type: FieldType; // Tipe ini harus mencakup 'email' dan 'password'
+  placeholder?: string;
+  required?: boolean;
+}
+
+export interface FormMeta {
+  moduleName: string;
+  title: string;
+  fields: FormField[];
+}

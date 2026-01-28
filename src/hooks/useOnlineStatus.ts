@@ -1,8 +1,7 @@
-'use client';
 import { useState, useEffect } from 'react';
 
 export function useOnlineStatus() {
-  const [isOnline, setIsOnline] = useState(
+  const [isOnline, setIsOnline] = useState<boolean>(
     typeof window !== 'undefined' ? navigator.onLine : true
   );
 

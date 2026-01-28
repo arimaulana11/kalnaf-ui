@@ -1,4 +1,13 @@
 import axiosInstance from '@/lib/axios';
+import axios from 'axios';
+
+const API_BASE_URL = 'https://kalnaf-coresys.vercel.app/api';
+
+// Konfigurasi default axios untuk kredensial (cookie)
+const authApi = axios.create({
+  baseURL: API_BASE_URL,
+  withCredentials: true,
+});
 
 export const authService = {
   async login(credentials: any) {
@@ -11,9 +20,13 @@ export const authService = {
     return data;
   },
 
-  logout() {
-    localStorage.removeItem('user');
-    localStorage.removeItem('access_token');
-    window.location.href = '/login';
-  }
+  async logout() {
+    try {
+      const response = await authApi.post('/auth/logout');
+      return response.data;
+    } catch (error: any) {
+      // Lempar error agar bisa ditangani di komponen UI
+      throw error.response?.data || new Error('Gagal logout');
+    }
+  },
 };
