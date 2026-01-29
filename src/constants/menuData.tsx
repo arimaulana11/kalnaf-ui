@@ -20,6 +20,7 @@ export const menuGroups = [
     items: [
       { icon: <LayoutDashboard size={20} />, label: 'Overview', path: '' },
       { icon: <ShoppingCart size={20} />, label: 'Go to Cashier', path: '/pos' },
+      { icon: <Clock size={20} />, label: 'Current Shift', path: '/shift/active' },
     ]
   },
   {

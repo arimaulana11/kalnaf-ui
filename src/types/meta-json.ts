@@ -1,9 +1,9 @@
-export type FieldType = 'text' | 'email' | 'password' | 'number' | 'tel' | 'textarea' | 'select' | 'checkbox';
+export type FieldType = 'text' | 'email' | 'password' | 'tel' | 'number' | 'checkbox';
 
 export interface FormField {
   name: string;
   label: string;
-  type: FieldType; // Tipe ini harus mencakup 'email' dan 'password'
+  type: FieldType;
   placeholder?: string;
   required?: boolean;
 }

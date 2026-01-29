@@ -10,12 +10,7 @@ export const STORE_FORM_META: FormMeta = {
     { name: 'logo_url', label: 'URL Logo Toko', type: 'text', placeholder: 'https://...', required: false },
     { name: 'receipt_header', label: 'Header Struk', type: 'text', placeholder: 'Teks atas struk', required: false },
     { name: 'receipt_footer', label: 'Footer Struk', type: 'text', placeholder: 'Teks bawah struk', required: false },
-    {
-      name: 'is_active',
-      label: 'Status Toko Aktif',
-      type: 'checkbox',
-      required: false
-    }
+    { name: 'is_active', label: 'Status Toko Aktif', type: 'checkbox', required: false }
   ]
 };
 
@@ -23,13 +18,7 @@ export const CREATE_STORE_META: FormMeta = {
   moduleName: 'create_store', // Tambahkan ini untuk memenuhi kontrak FormMeta
   title: 'Tambah Cabang Baru',
   fields: [
-    {
-      name: 'name',
-      label: 'Nama Toko',
-      type: 'text',
-      placeholder: 'Contoh: Berkah Group - Cabang Pusat',
-      required: true,
-    },
+    { name: 'name', label: 'Nama Toko', type: 'text', placeholder: 'Contoh: Berkah Group - Cabang Pusat', required: true, },
     {
       name: 'address',
       label: 'Alamat Lengkap',
@@ -78,5 +67,6 @@ export const STORE_DETAIL_META: FormMeta = {
     { name: 'logo_url', label: 'Link Logo', type: 'text', placeholder: 'https://...', required: false },
     { name: 'receipt_header', label: 'Header Struk', type: 'text', required: false },
     { name: 'receipt_footer', label: 'Footer Struk', type: 'text', required: false },
+    { name: 'is_active', label: 'Status Toko Aktif', type: 'checkbox', required: false }
   ]
 };
