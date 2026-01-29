@@ -5,24 +5,30 @@ import api from '@/lib/axios';
 import { StoreCard } from '@/components/store/StoreCard';
 import { Plus, LayoutGrid } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { useAuthStore } from '@/store/useAuthStore'; // Import ini
 
 export default function StoreListPage() {
   const router = useRouter();
+  const setStoreId = useAuthStore((state) => state.setStoreId); // Ambil setter store ID
+
   const { data, isLoading } = useQuery({
     queryKey: ['stores'],
     queryFn: async () => {
-      // API ini akan mengirim header Authorization otomatis lewat axios interceptor
       const res = await api.get('/stores');
+      // Berdasarkan JSON response kamu sebelumnya:
+      // res.data -> { success, statusCode, data: { items: [], meta: {} } }
       return res.data.data; 
     },
   });
 
+  // PERBAIKAN: Akses .items karena struktur datanya adalah { items: [...], meta: {} }
   const stores = data?.data || [];
 
   const handleSelectStore = (store: any) => {
-    // Kita simpan ID atau Info toko hanya untuk kebutuhan UI Dashboard
-    // setStoreId(store.id); 
-    // router.push('/dashboard/overview'); 
+    // Simpan ID ke Zustand agar bisa digunakan untuk navigasi/UI
+    setStoreId(store.id); 
+    // Arahkan ke dashboard spesifik toko (atau sesuaikan path-nya)
+    router.push(`/store/${store.id}`); 
   };
 
   return (
@@ -34,7 +40,7 @@ export default function StoreListPage() {
         </div>
         
         <button 
-          onClick={() => router.push('/dashboard/stores/create')}
+          onClick={() => router.push('/store/create')}
           className="flex items-center justify-center gap-3 bg-blue-600 text-white px-8 py-4 rounded-2xl font-bold hover:bg-blue-700 transition-all active:scale-95 shadow-xl shadow-blue-100"
         >
           <Plus size={22} strokeWidth={3} />
@@ -58,6 +64,7 @@ export default function StoreListPage() {
               phone={store.phone || 'N/A'}
               logo={store.logo_url}
               status={store.is_active}
+              // Sekarang handleSelectStore sudah aktif
               onSelect={() => handleSelectStore(store)}
             />
           ))}
