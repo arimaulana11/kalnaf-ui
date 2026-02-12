@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import api from '@/lib/axios';
-import { Product, ProductPayload, ProductVariantPayload } from '@/types/product';
+import { Product, ProductPayload } from '@/types/product';
 import { ProductTable } from '@/components/products/ProductTable';
 import { ProductModal } from '@/components/products/ProductModal';
 import { Plus, Search, Loader2, RefreshCw, ChevronLeft, ChevronRight, Package } from 'lucide-react';
@@ -13,26 +13,29 @@ export default function ProductClient() {
   const queryClient = useQueryClient();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
-  
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState('');
 
-  // 1. Fetch Products
+  // 1. Fetch Data
   const { data: productResponse, isLoading, isFetching } = useQuery({
     queryKey: ['products', page, search],
     queryFn: async () => {
       const res = await api.get(`/products`, {
         params: { page, limit: 10, search: search || undefined }
       });
-      return res.data.data; // Mengambil res.data.data (Object pagination)
+      return res.data.data;
     },
     placeholderData: (previousData) => previousData,
   });
 
-  // 2. Mutation: Save (Create/Update)
+  // --- LETAKKAN DI SINI ---
+  // Ambil meta dari response. Pastikan struktur backend Anda adalah { data: [...], meta: {...} }
+  const meta = productResponse?.meta;
+
+  // 2. Save Mutation
   const saveProduct = useMutation({
     mutationFn: async (payload: ProductPayload) => {
-      if (selectedProduct) {
+      if (selectedProduct?.id) {
         return api.patch(`/products/${selectedProduct.id}`, payload);
       }
       return api.post('/products', payload);
@@ -47,7 +50,7 @@ export default function ProductClient() {
     }
   });
 
-  // 3. Mutation: Delete
+  // 3. Delete Mutation
   const deleteProduct = useMutation({
     mutationFn: async (id: number) => api.delete(`/products/${id}/force`),
     onSuccess: () => {
@@ -56,13 +59,12 @@ export default function ProductClient() {
     }
   });
 
-  // --- LOGIKA TRANSFORMASI DATA ---
+  // 4. Transformasi Data SEBELUM dikirim ke Backend
   const handleSaveProduct = (rawForm: any) => {
-    // Cari SKU dari varian yang merupakan Base Unit (satuan terkecil)
-    const baseVariant = rawForm.variants.find((v: ProductVariantPayload) => v.isBaseUnit);
+    const baseVariant = rawForm.variants.find((v: any) => v.isBaseUnit);
     const baseSku = baseVariant?.sku || null;
 
-    const formattedPayload: ProductPayload = {
+    const formattedPayload: any = {
       name: rawForm.name,
       description: rawForm.description || '',
       categoryId: Number(rawForm.categoryId),
@@ -70,38 +72,73 @@ export default function ProductClient() {
       imageUrl: rawForm.imageUrl || '',
       isActive: rawForm.isActive ?? true,
       purchasePrice: Number(rawForm.purchasePrice || 0),
-      
-      // Transformasi Varian (Multi-UOM)
+
+      // 1. Mapping Variants
       variants: rawForm.variants.map((v: any) => ({
+        ...(v.id && { id: v.id }),
         name: v.name,
         sku: v.sku,
         unitName: v.unitName,
         price: Number(v.price),
         multiplier: Number(v.multiplier),
-        isBaseUnit: v.isBaseUnit,
-        // Otomatis set parentSku ke unit dasar jika bukan base unit itu sendiri
-        parentSku: v.isBaseUnit ? null : (v.parentSku || baseSku)
-      })),
+        isBaseUnit: !!v.isBaseUnit,
+        parentSku: v.isBaseUnit ? null : (v.parentSku || baseSku),
 
-      // Mapping Stok Awal (Hanya untuk produk baru)
-      initialStocks: !selectedProduct ? rawForm.initialStocks?.map((s: any) => ({
+        // 2. PINDAHKAN LOGIKA KOMPONEN KE SINI
+        // Karena JSON yang kamu mau: variants[ { components: [...] } ]
+        ...(rawForm.type === 'PARCEL' && {
+          components: v.components?.map((c: any) => ({
+            componentVariantId: Number(c.componentVariantId),
+            qty: Number(c.qty)
+          })) || []
+        })
+      })),
+    };
+
+    // 3. Mapping Parcel Items (Hanya jika backend minta di level root, 
+    // tapi berdasarkan JSON request kamu sebelumnya, ini seharusnya ada di dalam variants)
+    // Jika backend kamu minta di level root dengan nama 'parcelItems', gunakan ini:
+    if (rawForm.type === 'PARCEL' && !formattedPayload.variants[0].components) {
+      formattedPayload.parcelItems = rawForm.variants[0].components?.map((p: any) => ({
+        variantId: Number(p.componentVariantId),
+        qty: Number(p.qty)
+      }));
+    }
+
+    // Initial Stocks HANYA dikirim saat CREATE
+    if (!selectedProduct) {
+      formattedPayload.initialStocks = rawForm.initialStocks?.map((s: any) => ({
         storeId: s.storeId,
         qty: Number(s.qty),
         purchasePrice: Number(s.purchasePrice || rawForm.purchasePrice)
-      })) : undefined,
+      }));
+    }
 
-      // Mapping Parcel Items (Hanya jika tipe PARCEL)
-      parcelItems: rawForm.type === 'PARCEL' ? rawForm.parcelItems?.map((p: any) => ({
-        variantId: Number(p.variantId),
-        qty: Number(p.qty)
-      })) : undefined
-    };
-
+    console.log("PAYLOAD SIAP KIRIM:", formattedPayload);
     saveProduct.mutate(formattedPayload);
   };
 
+  // 5. Transformasi Data SAAT TOMBOL EDIT DIKLIK
   const handleEdit = (product: Product) => {
-    setSelectedProduct(product);
+    // Meratakan data agar Modal bisa membaca value dengan mudah
+    const preparedData = {
+      ...product,
+      categoryId: product.categoryId?.toString(), // Seringkali select butuh string
+      // Pastikan varian terpetakan lengkap
+      variants: product.productVariants?.map(v => ({
+        ...v,
+        price: v.price,
+        multiplier: v.multiplier
+      })),
+      // Mapping parcelItems agar componentVariantId terisi di UI
+      parcelItems: product.productVariants?.map(item => ({
+        variantId: item.id,
+        componentVariantId: item.id, // Sync dengan component manager
+        qty: item.stocks
+      }))
+    };
+
+    setSelectedProduct(preparedData as any);
     setIsModalOpen(true);
   };
 
@@ -109,8 +146,6 @@ export default function ProductClient() {
     setIsModalOpen(false);
     setSelectedProduct(null);
   };
-
-  const meta = productResponse?.meta;
 
   return (
     <div className="p-6 space-y-6 min-h-screen">
@@ -120,7 +155,7 @@ export default function ProductClient() {
           <h1 className="text-3xl font-black text-slate-900 uppercase italic tracking-tighter">Katalog Produk</h1>
           <p className="text-slate-500 font-medium">Kelola item, varian unit, dan stok inventaris</p>
         </div>
-        <button 
+        <button
           onClick={() => setIsModalOpen(true)}
           className="bg-slate-900 text-white px-8 py-4 rounded-[1.5rem] font-bold flex items-center gap-2 hover:bg-blue-600 transition-all shadow-xl active:scale-95"
         >
@@ -132,25 +167,25 @@ export default function ProductClient() {
       <div className="bg-white p-4 rounded-[2rem] border border-slate-100 shadow-sm flex flex-col md:flex-row gap-4 items-center">
         <div className="relative flex-1 w-full group">
           <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-blue-500 transition-colors" size={20} />
-          <input 
+          <input
             type="text"
             placeholder="Cari produk atau SKU..."
             className="w-full pl-14 pr-6 py-4 bg-slate-50 rounded-2xl outline-none focus:bg-white focus:ring-4 focus:ring-blue-500/5 border-2 border-transparent focus:border-blue-500 transition-all font-bold text-slate-700"
             value={search}
             onChange={(e) => {
-                setSearch(e.target.value);
-                setPage(1);
+              setSearch(e.target.value);
+              setPage(1);
             }}
           />
         </div>
         <div className="flex items-center gap-2">
-            {isFetching && <Loader2 className="animate-spin text-blue-600" size={20} />}
-            <button 
-                onClick={() => queryClient.invalidateQueries({ queryKey: ['products'] })}
-                className="p-4 text-slate-400 hover:text-slate-900 hover:bg-slate-100 rounded-2xl transition-all"
-            >
-                <RefreshCw size={20} />
-            </button>
+          {isFetching && <Loader2 className="animate-spin text-blue-600" size={20} />}
+          <button
+            onClick={() => queryClient.invalidateQueries({ queryKey: ['products'] })}
+            className="p-4 text-slate-400 hover:text-slate-900 hover:bg-slate-100 rounded-2xl transition-all"
+          >
+            <RefreshCw size={20} />
+          </button>
         </div>
       </div>
 
@@ -165,13 +200,13 @@ export default function ProductClient() {
         </div>
       ) : (
         <>
-          <ProductTable 
-            data={productResponse?.data || []} 
+          <ProductTable
+            data={productResponse?.data || []}
             onEdit={handleEdit}
             onDelete={(id) => {
-                if(window.confirm('Hapus produk ini beserta seluruh variannya?')) {
-                    deleteProduct.mutate(id);
-                }
+              if (window.confirm('Hapus produk ini beserta seluruh variannya?')) {
+                deleteProduct.mutate(id);
+              }
             }}
           />
 
@@ -206,7 +241,7 @@ export default function ProductClient() {
       )}
 
       {/* MODAL */}
-      <ProductModal 
+      <ProductModal
         isOpen={isModalOpen}
         onClose={handleCloseModal}
         onSubmit={handleSaveProduct} // Gunakan handler transformasi di sini

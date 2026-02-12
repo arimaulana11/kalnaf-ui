@@ -13,7 +13,7 @@ interface Category {
 interface ProductBasicInfoProps {
   data: {
     name: string;
-    categoryId: number;
+    categoryId: number | string; // Mendukung string saat proses input
     purchasePrice: number;
     description: string;
     imageUrl: string;
@@ -28,14 +28,14 @@ export const ProductBasicInfo = ({
   isParcel 
 }: ProductBasicInfoProps) => {
 
-  // IMPLEMENTASI HOOK SESUAI PERMINTAAN
   const { data: categories, isLoading, isRefetching } = useQuery({
     queryKey: ['categories'],
     queryFn: async () => {
       const res = await api.get('/categories');
-      // Mengakses data sesuai struktur res.data.data.data
+      // Pastikan akses path data sesuai dengan response backend Anda
       return res.data.data.data as Category[];
-    }
+    },
+    staleTime: 5 * 60 * 1000, // Cache kategori selama 5 menit
   });
 
   return (
@@ -62,7 +62,7 @@ export const ProductBasicInfo = ({
             <div className="relative">
               <input 
                 type="number" 
-                className="w-full p-4 bg-slate-50 rounded-2xl font-bold outline-none border-2 border-transparent focus:border-blue-500 focus:bg-white transition-all text-blue-600 pl-12 shadow-sm" 
+                className="w-full p-4 bg-slate-50 rounded-2xl font-bold outline-none border-2 border-transparent focus:border-blue-500 focus:bg-white transition-all text-blue-600 pl-12 shadow-sm [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" 
                 value={data.purchasePrice} 
                 onChange={(e) => onChange('purchasePrice', Number(e.target.value))} 
               />
@@ -83,22 +83,17 @@ export const ProductBasicInfo = ({
           <div className="relative group">
             <select 
               className="w-full p-4 bg-slate-50 rounded-2xl font-bold outline-none border-2 border-transparent focus:border-blue-500 focus:bg-white transition-all appearance-none cursor-pointer text-slate-700 disabled:opacity-50 shadow-sm"
-              value={data.categoryId}
+              // Gunakan toString() untuk memastikan value select selalu sinkron dengan state
+              value={data.categoryId?.toString()}
               onChange={(e) => onChange('categoryId', Number(e.target.value))}
               disabled={isLoading}
             >
-              {isLoading ? (
-                <option>Memuat data...</option>
-              ) : (
-                <>
-                  <option value={0} disabled>Pilih Kategori</option>
-                  {categories?.map((cat) => (
-                    <option key={cat.id} value={cat.id}>
-                      {cat.name}
-                    </option>
-                  ))}
-                </>
-              )}
+              <option value="" disabled>Pilih Kategori</option>
+              {categories?.map((cat) => (
+                <option key={cat.id} value={cat.id.toString()}>
+                  {cat.name}
+                </option>
+              ))}
             </select>
             
             <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400 group-focus-within:text-blue-500 transition-colors">

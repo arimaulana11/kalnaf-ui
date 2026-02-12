@@ -1,150 +1,101 @@
 'use client';
 
 import React from 'react';
-import { Plus, Trash2, Box, Hash, ShoppingBag, Info } from 'lucide-react';
+import { Plus, Trash2, Layers, Hash } from 'lucide-react';
+import { ProductVariantSelect } from './SearchableProductSelect';
 
-interface ComponentItem {
-  componentVariantId: number;
-  qty: number;
-}
-
-interface ParcelComponentManagerProps {
-  // Gunakan optional chaining pada type atau pastikan default value di destructuring
-  components?: ComponentItem[]; 
-  onUpdate: (newComponents: ComponentItem[]) => void;
-  availableProducts?: { id: number; name: string; price: number }[];
-}
-
-export const ParcelComponentManager = ({ 
-  // 1. SOLUSI UTAMA: Berikan default value [] agar .length tidak error
-  components = [], 
-  onUpdate,
-  availableProducts = [
-    { id: 1, name: 'Minyak Goreng Bimoli 1L', price: 18000 },
-    { id: 2, name: 'Beras Pandan Wangi 5kg', price: 85000 },
-    { id: 3, name: 'Gula Pasir 1kg', price: 14500 }
-  ]
-}: ParcelComponentManagerProps) => {
-
-  // 2. Gunakan safety check saat melakukan spread
-  const handleAddComponent = () => {
-    const currentComponents = Array.isArray(components) ? components : [];
-    onUpdate([...currentComponents, { componentVariantId: 0, qty: 1 }]);
+export const ParcelComponentManager = ({ components = [], onUpdate }: any) => {
+  
+  const handleAdd = () => {
+    onUpdate([...components, { componentVariantId: 0, qty: 1 }]);
   };
 
-  const handleRemoveComponent = (index: number) => {
-    const updated = components.filter((_, i) => i !== index);
-    onUpdate(updated);
+  const handleUpdate = (index: number, field: string, value: any) => {
+    const next = [...components];
+    next[index] = { ...next[index], [field]: Number(value) };
+    onUpdate(next);
   };
 
-  const handleUpdateField = (index: number, field: keyof ComponentItem, value: number) => {
-    const updated = [...components];
-    updated[index] = { ...updated[index], [field]: value };
-    onUpdate(updated);
+  const handleRemove = (index: number) => {
+    onUpdate(components.filter((_: any, i: number) => i !== index));
   };
-
-  // 3. Menghitung total estimasi harga paket (Fitur Tambahan)
-  const totalEstimation = components.reduce((acc, curr) => {
-    const product = availableProducts.find(p => p.id === curr.componentVariantId);
-    return acc + (product ? product.price * curr.qty : 0);
-  }, 0);
 
   return (
-    <div className="mt-6 p-6 bg-white/60 rounded-[2rem] border-2 border-dashed border-slate-200 animate-in fade-in zoom-in-95 duration-300">
-      <div className="flex justify-between items-center mb-4 px-2">
-        <div className="flex items-center gap-2">
-          <div className="p-2 bg-blue-100 text-blue-600 rounded-lg">
-            <Box size={16} />
+    <div className="mt-4 bg-white rounded-3xl border border-slate-200 overflow-visible shadow-sm">
+      {/* Header */}
+      <div className="p-5 border-b border-slate-100 flex justify-between items-center bg-slate-50/30">
+        <div className="flex items-center gap-3">
+          <div className="p-2 bg-indigo-50 text-indigo-600 rounded-lg">
+            <Layers size={16} />
           </div>
-          <div>
-            <h4 className="text-[10px] font-black text-slate-700 uppercase tracking-widest">
-              Daftar Isi Paket (Komponen)
-            </h4>
-            {components.length > 0 && (
-               <p className="text-[9px] text-blue-500 font-bold mt-0.5">
-                 Estimasi Modal: Rp{totalEstimation.toLocaleString()}
-               </p>
-            )}
-          </div>
+          <span className="font-black text-slate-700 uppercase text-[10px] tracking-widest">
+            Isi Komponen Paket
+          </span>
         </div>
-        <button
+        <button 
           type="button"
-          onClick={handleAddComponent}
-          className="flex items-center gap-2 px-4 py-2 bg-slate-900 text-white text-[10px] font-black uppercase rounded-xl hover:bg-blue-600 transition-all shadow-md active:scale-95"
+          onClick={handleAdd}
+          className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 transition-all text-[10px] font-black uppercase shadow-md shadow-indigo-100"
         >
           <Plus size={14} /> Tambah Barang
         </button>
       </div>
 
-      {/* Gunakan optional chaining ?. sebagai pengaman tambahan */}
-      {components?.length === 0 ? (
-        <div className="text-center py-8 border-2 border-dashed border-slate-100 rounded-2xl bg-white/40">
-          <p className="text-xs font-bold text-slate-400 italic">Belum ada komponen produk dalam paket ini.</p>
-        </div>
-      ) : (
-        <div className="space-y-3">
-          {components.map((comp, idx) => (
-            <div 
-              key={idx} 
-              className="group flex flex-col md:flex-row gap-3 items-center bg-white p-3 rounded-2xl shadow-sm border border-slate-100 hover:border-blue-200 transition-all"
-            >
-              {/* Dropdown Pilih Produk */}
-              <div className="flex-[3] w-full relative">
-                <div className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none">
-                  <ShoppingBag size={14} />
-                </div>
-                <select
-                  className="w-full pl-9 pr-4 py-2 bg-slate-50 border-none rounded-xl text-xs font-bold text-slate-700 outline-none focus:ring-2 focus:ring-blue-500/20 appearance-none cursor-pointer"
-                  value={comp.componentVariantId}
-                  onChange={(e) => handleUpdateField(idx, 'componentVariantId', Number(e.target.value))}
-                >
-                  <option value={0}>Pilih Produk Fisik...</option>
-                  {availableProducts.map((p) => (
-                    <option key={p.id} value={p.id}>
-                      {p.name} (Rp{p.price.toLocaleString()})
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              {/* Input Quantity */}
-              <div className="flex-1 w-full relative">
-                <div className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none">
-                  <Hash size={14} />
-                </div>
-                <input
-                  type="number"
-                  min="1"
-                  className="w-full pl-9 pr-4 py-2 bg-slate-50 border-none rounded-xl text-xs font-bold text-slate-700 outline-none focus:ring-2 focus:ring-blue-500/20"
-                  placeholder="Qty"
-                  value={comp.qty}
-                  onChange={(e) => {
-                    const val = Math.max(1, Number(e.target.value)); // Minimal 1
-                    handleUpdateField(idx, 'qty', val);
-                  }}
-                />
-              </div>
-
-              {/* Tombol Hapus */}
-              <button
-                type="button"
-                onClick={() => handleRemoveComponent(idx)}
-                className="p-2 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all"
-                title="Hapus Komponen"
-              >
-                <Trash2 size={18} />
-              </button>
+      {/* List - Gunakan overflow-visible agar dropdown select tidak terpotong */}
+      <div className="p-5 space-y-3 overflow-visible">
+        {components.map((item: any, idx: number) => (
+          <div 
+            key={idx} 
+            className="flex flex-col md:flex-row gap-3 items-start md:items-center p-3 bg-slate-50/50 rounded-2xl border border-slate-100 hover:border-indigo-200 transition-all overflow-visible"
+          >
+            {/* Index */}
+            <div className="hidden md:flex w-6 h-6 shrink-0 items-center justify-center bg-white border border-slate-200 rounded-full text-[9px] font-black text-slate-400">
+              {idx + 1}
             </div>
-          ))}
-        </div>
-      )}
 
-      {components.length > 0 && (
-        <div className="mt-4 px-2 flex items-center gap-2 text-[9px] font-bold text-slate-400 italic">
-          <Info size={12} className="text-blue-400" />
-          <span>Harga jual paket disarankan lebih tinggi dari Rp{totalEstimation.toLocaleString()}</span>
-        </div>
-      )}
+            {/* Product Select - Pastikan z-index tinggi saat dropdown terbuka */}
+            <div className="flex-[4] w-full relative z-[60]"> 
+              <ProductVariantSelect 
+                value={item.componentVariantId}
+                onChange={(val:any) => handleUpdate(idx, 'componentVariantId', val)}
+              />
+            </div>
+
+            {/* Qty Input */}
+            <div className="w-full md:w-32 relative">
+              <div className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-300">
+                <Hash size={12} />
+              </div>
+              <input 
+                type="number"
+                min="1"
+                placeholder="Qty"
+                value={item.qty || ""}
+                onChange={(e) => handleUpdate(idx, 'qty', e.target.value)}
+                className="w-full pl-9 pr-3 py-2.5 bg-white border border-slate-200 rounded-xl font-bold text-xs outline-none focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-400 transition-all"
+              />
+            </div>
+
+            {/* Action */}
+            <button 
+              type="button"
+              onClick={() => handleRemove(idx)} 
+              className="p-2.5 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all self-end md:self-auto"
+            >
+              <Trash2 size={18} />
+            </button>
+          </div>
+        ))}
+
+        {components.length === 0 && (
+          <div className="py-8 text-center flex flex-col items-center gap-2">
+            <div className="w-12 h-12 bg-slate-50 rounded-full flex items-center justify-center text-slate-300">
+              <Layers size={20} />
+            </div>
+            <p className="text-[11px] font-bold text-slate-400 italic">Belum ada barang isi paket.</p>
+          </div>
+        )}
+      </div>
     </div>
   );
 };
