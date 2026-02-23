@@ -3,6 +3,33 @@
 @tailwind utilities;
 
 /* Tambahkan ini untuk tes paksa */
-body {
-  background-color: #f3f4f6 !important; /* warna bg-gray-100 */
+@media print {
+  /* 1. Sembunyikan seluruh halaman tapi jangan pakai 'display: none' agar struk tidak ikut hilang */
+  body {
+    visibility: hidden;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  /* 2. Tampilkan HANYA kontainer struk */
+  #receipt-print {
+    visibility: visible !important;
+    display: block !important;
+    position: absolute !important; /* Menempatkan struk di paling atas kertas */
+    left: 0 !important;
+    top: 0 !important;
+    width: 48mm !important; /* Gunakan lebar aman untuk thermal 58mm */
+    background: white !important;
+  }
+
+  /* 3. Pastikan semua teks di dalam struk terlihat */
+  #receipt-print * {
+    visibility: visible !important;
+  }
+
+  /* 4. Atur ukuran kertas roll */
+  @page {
+    size: 58mm auto;
+    margin: 0 !important;
+  }
 }
