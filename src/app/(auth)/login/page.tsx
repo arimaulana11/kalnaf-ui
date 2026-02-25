@@ -28,7 +28,7 @@ export default function LoginPage() {
         // Beri jeda sangat singkat agar Zustand selesai menulis ke LocalStorage
         // sebelum router pindah halaman
         setTimeout(() => {
-          router.push('/store');
+          router.push('/dashboard');
         }, 100);
       } else {
         console.error("Token tidak ditemukan di response API!");

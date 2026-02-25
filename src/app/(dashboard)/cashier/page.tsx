@@ -1,4 +1,4 @@
-import { CashierLayout } from "CashierLayout";
+import { CashierLayout } from "@/components/cashier/CashierLayout";
 
 export default function CashierPage() {
   return (

@@ -23,3 +23,14 @@ export type Store = {
   updated_at: string;
   user_stores: unknown[];
 };
+
+export type ActiveShift = {
+  id: string;          // Berubah dari number ke string (UUID)
+  storeId: string;
+  userId: string;
+  startTime: string;   // ISO Date string
+  endTime: string | null; 
+  startingCash: number;
+  closingCash: number | null;
+  status: 'OPEN' | 'CLOSED'; // Sesuai dengan value "OPEN" di response
+}

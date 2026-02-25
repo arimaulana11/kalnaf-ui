@@ -83,7 +83,7 @@ export const ActiveShiftDetail = ({
           <Banknote className="absolute -right-10 -bottom-10 text-white/5 w-64 h-64" />
           <p className="text-xs font-bold text-white/50 uppercase tracking-[0.2em] mb-2">Saldo Sistem Saat Ini</p>
           <h2 className="text-5xl font-black tracking-tighter italic">
-            {formatIDR(data?.expectedCash || 0)}
+            {formatIDR(data?.startingCash || 0)}
           </h2>
         </div>
       </div>

@@ -15,6 +15,7 @@ import {
   UserPlus
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
+import { storage } from '@/lib/helper/storage.helper';
 
 /**
  * Interface untuk tipe data Store berdasarkan response API
@@ -68,9 +69,11 @@ export default function ActiveShiftPage() {
         startingCash
       });
     },
-    onSuccess: () => {
+    onSuccess: (response) => {
       toast.success('Shift berhasil dibuka. Selamat bertugas!');
       queryClient.invalidateQueries({ queryKey: ['current-shift', selectedStoreId] });
+      storage.set("active_shift", response.data.data);
+      
     },
     onError: (error: any) => {
       toast.error(error.response?.data?.message || 'Gagal membuka shift');

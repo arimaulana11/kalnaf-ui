@@ -1,20 +1,23 @@
 'use client';
 
 import React, { useState, useMemo, useEffect, useRef } from 'react';
-import { Search, ShoppingCart, Trash2, Maximize, Minimize, Tag, User, Phone, Archive, History, Clock, X } from 'lucide-react';
+import { Search, ShoppingCart, Trash2, Maximize, Minimize, Tag, User, Archive, X } from 'lucide-react';
 import { useCashier } from '@/hooks/useCashier';
 import { CartItem } from '@/types/cashier';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { createTransaction } from '@/services/cashier.service';
 
 // Sub-komponen
-import { ProductCard } from './components/cashier/ProductCard';
-import { PaymentSelector } from './components/cashier/PaymentSelector';
-import { OrderSummary } from './components/cashier/OrderSummary';
+import { ProductCard } from '../../../components/cashier/ProductCard';
+import { PaymentSelector } from '../../../components/cashier/PaymentSelector';
+import { OrderSummary } from '../../../components/cashier/OrderSummary';
 import { Receipt } from 'components/cashier/Receipt';
 import { renderToString } from 'react-dom/server';
+import { ActiveShift } from '@/types/store';
+import { storage } from '@/lib/helper/storage.helper';
 
 export const CashierLayout = () => {
+  const [shift, setShift] = useState<ActiveShift | null>(null);
   const { productsQuery, search, setSearch } = useCashier();
   const queryClient = useQueryClient();
   const containerRef = useRef<HTMLDivElement>(null);
@@ -32,6 +35,16 @@ export const CashierLayout = () => {
   const [customerPhone, setCustomerPhone] = useState('');
   const [archivedOrders, setArchivedOrders] = useState<any[]>([]);
   const [showArchive, setShowArchive] = useState(false);
+
+  useEffect(() => {
+    // Kode ini hanya jalan di browser
+    const savedData = storage.get<ActiveShift>('active_shift');
+    if (!savedData) {
+      window.location.href = '/shift/active'; // TODO : need set localstorage
+    } else {
+      setShift(savedData);
+    }
+  }, []);
 
   // --- 2. DATA PROCESSING (Diletakkan sebelum useEffect agar tidak error) ---
   const products = useMemo(() => {
@@ -143,8 +156,9 @@ export const CashierLayout = () => {
 
   const handleCheckout = async () => {
     if (cart.length === 0 || mutation.isPending) return;
+
     const payload = {
-      storeId: "58f9cee0-29b5-47df-bf63-fd1df3ab3cd1",
+      storeId: shift?.storeId,
       paymentMethod,
       customerName,
       customerPhone,
