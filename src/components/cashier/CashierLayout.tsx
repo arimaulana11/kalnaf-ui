@@ -146,7 +146,11 @@ export const CashierLayout = () => {
   // --- 4. MUTATION & HANDLERS ---
   const mutation = useMutation({
     mutationFn: createTransaction,
-    onSuccess: () => {
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({
+        queryKey: ['cashier-products'],
+        exact: false
+      });
       setIsPrinting(true);
     },
     onError: (error: any) => {

@@ -16,7 +16,7 @@ export const useCashier = () => {
     queryFn: () => getProducts(debouncedSearch),
     placeholderData: (previousData) => previousData,
     // Tambahkan staleTime agar tidak re-fetch terlalu sering saat berpindah tab
-    staleTime: 1000 * 60 * 5, 
+    staleTime: 0, 
   });
 
   const checkoutMutation = useMutation({
