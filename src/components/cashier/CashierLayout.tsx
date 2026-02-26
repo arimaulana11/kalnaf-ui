@@ -11,7 +11,7 @@ import { createTransaction } from '@/services/cashier.service';
 import { ProductCard } from '../../../components/cashier/ProductCard';
 import { PaymentSelector } from '../../../components/cashier/PaymentSelector';
 import { OrderSummary } from '../../../components/cashier/OrderSummary';
-import { Receipt } from 'components/cashier/Receipt';
+import { Receipt } from '../../../components/cashier/Receipt';
 import { renderToString } from 'react-dom/server';
 import { ActiveShift } from '@/types/store';
 import { storage } from '@/lib/helper/storage.helper';
