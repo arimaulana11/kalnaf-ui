@@ -40,7 +40,7 @@ export const menuGroups = [
   {
     label: 'Sales & Reports',
     items: [
-      { icon: <History size={20} />, label: 'Transaction History', path: '/transactions' },
+      { icon: <History size={20} />, label: 'Transaction History', path: '/cashier/history' },
       { icon: <BarChart3 size={20} />, label: 'Sales Analytics', path: '/reports/sales' },
       { icon: <Clock size={20} />, label: 'Shift Records', path: '/reports/shifts' },
     ]
