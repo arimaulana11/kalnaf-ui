@@ -9,9 +9,11 @@ import {
   Users, 
   Store,
   Truck,
-  ClipboardList,
+  ArrowRightLeft, // Untuk Stock Movement
+  ClipboardCheck,  // Untuk Stock Opname
   History,
-  UserCog
+  UserCog,
+  FileClock       // Untuk Shift Records
 } from 'lucide-react';
 
 export const menuGroups = [
@@ -33,7 +35,10 @@ export const menuGroups = [
   {
     label: 'Inventory & Stock',
     items: [
-      { icon: <ClipboardList size={20} />, label: 'Stock In/Out', path: '/inventory/stock-opname' },
+      /* Menggunakan ArrowRightLeft untuk melambangkan barang masuk/keluar */
+      { icon: <ArrowRightLeft size={20} />, label: 'Stock In/Out', path: '/inventory/stock-movement' },
+      /* Menggunakan ClipboardCheck untuk melambangkan proses audit/verifikasi stok */
+      { icon: <ClipboardCheck size={20} />, label: 'Stock Opname', path: '/inventory/stock-opname' },
       { icon: <Truck size={20} />, label: 'Suppliers', path: '/inventory/suppliers' },
     ]
   },
@@ -42,7 +47,8 @@ export const menuGroups = [
     items: [
       { icon: <History size={20} />, label: 'Transaction History', path: '/cashier/history' },
       { icon: <BarChart3 size={20} />, label: 'Sales Analytics', path: '/reports/sales' },
-      { icon: <Clock size={20} />, label: 'Shift Records', path: '/reports/shifts' },
+      /* Menggunakan FileClock agar beda dengan 'Current Shift' di atas */
+      { icon: <FileClock size={20} />, label: 'Shift Records', path: '/reports/shifts' },
     ]
   },
   {

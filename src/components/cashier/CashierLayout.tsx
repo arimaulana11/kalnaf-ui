@@ -8,10 +8,10 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { createTransaction } from '@/services/cashier.service';
 
 // Sub-komponen
-import { ProductCard } from '../../../components/cashier/ProductCard';
-import { PaymentSelector } from '../../../components/cashier/PaymentSelector';
-import { OrderSummary } from '../../../components/cashier/OrderSummary';
-import { Receipt } from '../../../components/cashier/Receipt';
+import { ProductCard } from './ProductCard';
+import { PaymentSelector } from './PaymentSelector';
+import { OrderSummary } from './OrderSummary';
+import { Receipt } from './Receipt';
 import { renderToString } from 'react-dom/server';
 import { ActiveShift } from '@/types/store';
 import { storage } from '@/lib/helper/storage.helper';

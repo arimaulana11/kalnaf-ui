@@ -8,7 +8,7 @@ import {
 } from 'lucide-react';
 import { getTransactionDetail, getTransactionHistory, voidTransaction } from '@/services/cashier.service';
 import { TransactionSummary } from '@/types/transactions';
-import { Receipt } from 'components/cashier/Receipt';
+import { Receipt } from '@/components/cashier/Receipt';
 
 export const TransactionHistory = () => {
   // --- STATES ---
