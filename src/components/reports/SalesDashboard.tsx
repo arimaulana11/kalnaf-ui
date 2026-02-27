@@ -93,6 +93,14 @@ const SalesDashboard: React.FC<SalesDashboardProps> = ({ reportData, filters, se
     }));
   };
 
+  const formatIDR = (amount: any) => {
+    return new Intl.NumberFormat('id-ID', {
+      style: 'currency',
+      currency: 'IDR',
+      minimumFractionDigits: 0
+    }).format(Number(amount) || 0);
+  };
+
   return (
     <div className="p-6 bg-gray-50 min-h-screen font-sans transition-all">
       {/* 1. HEADER & FILTER SECTION */}
@@ -251,7 +259,7 @@ const SalesDashboard: React.FC<SalesDashboardProps> = ({ reportData, filters, se
                     </div>
                   </td>
                   <td className={`px-6 py-4 text-sm font-black text-right ${row.payment_status === 'VOID' ? 'text-gray-300 line-through' : 'text-gray-800'}`}>
-                    Rp {row.total_amount.toLocaleString('id-ID')}
+                    Rp {formatIDR(row.total_amount)}
                   </td>
                   <td className="px-6 py-4 text-[11px] text-gray-400 text-right font-bold italic tracking-tighter">
                     {row.time}

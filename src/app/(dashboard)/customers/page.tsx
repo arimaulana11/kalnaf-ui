@@ -182,17 +182,6 @@ const CustomerPage = () => {
         initialData={selectedCustomer}
       />
 
-      {/* SYSTEM STATUS */}
-      <div className="mt-8 pt-6 border-t border-gray-200/60 flex items-center justify-between text-[10px] font-black text-gray-400 uppercase tracking-widest">
-        <div className="flex items-center gap-4">
-          <span className="flex items-center gap-1.5">
-            <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span> 
-            API Status: Online
-          </span>
-          <span>Region: Jakarta-ID</span>
-        </div>
-        <span>Powered by Gemini AI v3</span>
-      </div>
     </div>
   );
 };
