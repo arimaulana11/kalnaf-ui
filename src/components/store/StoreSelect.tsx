@@ -8,7 +8,7 @@ import api from '@/lib/axios'; // Pastikan ini mengarah ke axiosInstance Anda
 interface StoreOption {
     id: string;
     name: string;
-    is_active: boolean;
+    isActive: boolean;
 }
 
 interface StoreSelectProps {
@@ -55,7 +55,7 @@ export const StoreSelect = ({ selectedStoreId, onChange }: StoreSelectProps) => 
                             <option value="" disabled className="bg-slate-900 text-slate-500">
                                 {isError ? 'Gagal memuat lokasi' : 'Pilih Cabang / Gudang...'}
                             </option>
-                            {stores?.filter(s => s.is_active).map((store) => (
+                            {stores?.filter(s => s.isActive).map((store) => (
                                 <option key={store.id} value={store.id} className="bg-slate-900 text-white py-2">
                                     {store.name}
                                 </option>

@@ -36,7 +36,7 @@ export const menuGroups = [
     label: 'Inventory & Stock',
     items: [
       /* Menggunakan ArrowRightLeft untuk melambangkan barang masuk/keluar */
-      { icon: <ArrowRightLeft size={20} />, label: 'Stock In/Out', path: '/inventory/stock-movement' },
+      { icon: <ArrowRightLeft size={20} />, label: 'Stock Movement', path: '/inventory/stock-movement' },
       /* Menggunakan ClipboardCheck untuk melambangkan proses audit/verifikasi stok */
       { icon: <ClipboardCheck size={20} />, label: 'Stock Opname', path: '/inventory/stock-opname' },
       { icon: <Truck size={20} />, label: 'Suppliers', path: '/inventory/suppliers' },

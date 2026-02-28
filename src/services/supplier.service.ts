@@ -34,10 +34,11 @@ export const getSuppliers = async (params: SupplierQueryParams) => {
 /**
  * [READ] Mencari supplier berdasarkan query string.
  */
-export const searchSuppliers = async (q: string) => {
+export const searchSuppliers = async (q?: string) => {
   const response = await axiosInstance.get('/suppliers/search', {
     params: { 
-      q: q || undefined 
+      ...(q && { search: q })
+      // q: q || undefined 
     },
   });
   return response.data;
