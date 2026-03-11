@@ -1,3 +1,4 @@
+import HelpCenterButton from '@/components/shared/HelpCenterButton';
 import './globals.css'; // WAJIB ada untuk Tailwind
 import Providers from '@/components/shared/Providers';
 
@@ -17,6 +18,7 @@ export default function RootLayout({
       <body className="antialiased bg-gray-50 text-gray-900">
         <Providers>
           {children}
+          <HelpCenterButton />
         </Providers>
       </body>
     </html>
