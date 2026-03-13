@@ -11,17 +11,22 @@ export default function RegisterPage() {
 
   const mutation = useMutation({
     mutationFn: async (data: any) => {
-      // PERBAIKAN 2: Pastikan endpoint sesuai dengan base URL (biasanya pakai /api)
-      // Jika di Postman Anda '/api/auth/register', gunakan itu.
       const response = await api.post('/auth/register', data);
-      return response.data;
+      return { response: response.data, payload: data }; // Kembalikan payload juga agar email terbaca
     },
-    onSuccess: () => {
-      alert("Pendaftaran berhasil! Silakan login.");
-      router.push('/auth/login'); // PERBAIKAN 3: Arahkan ke path login yang benar
+    onSuccess: (result) => {
+      // Ambil email dari data yang diinput user saat daftar
+      const email = result.payload.email;
+
+      // Gunakan URLSearchParams untuk encode email agar aman di URL
+      const params = new URLSearchParams({ email });
+
+      alert("Pendaftaran berhasil! Silakan cek email Anda.");
+
+      // Redirect ke /verify?email=user@mail.com
+      router.push(`/verify?${params.toString()}`);
     },
     onError: (err: any) => {
-      console.error(err);
       alert(err.response?.data?.message || "Registrasi Gagal");
     }
   });
@@ -29,9 +34,9 @@ export default function RegisterPage() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-gray-50 p-4 font-sans">
       <div className="w-full max-w-md space-y-6">
-        <FormRenderer 
-          meta={REGISTER_FORM_META} 
-          onSubmit={(data) => mutation.mutate(data)} 
+        <FormRenderer
+          meta={REGISTER_FORM_META}
+          onSubmit={(data) => mutation.mutate(data)}
           isLoading={mutation.isPending}
           submitLabel="Daftar Akun Baru"
         />
@@ -39,8 +44,8 @@ export default function RegisterPage() {
         <div className="text-center">
           <p className="text-slate-500 text-sm">
             Sudah memiliki akun bisnis?{' '}
-            <Link 
-              href="/auth/login" 
+            <Link
+              href="/auth/login"
               className="font-bold text-blue-600 hover:text-blue-700 transition-colors duration-200 underline-offset-4 hover:underline"
             >
               Masuk di sini

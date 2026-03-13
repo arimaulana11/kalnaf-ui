@@ -1,6 +1,7 @@
 import HelpCenterButton from '@/components/shared/HelpCenterButton';
 import './globals.css'; // WAJIB ada untuk Tailwind
 import Providers from '@/components/shared/Providers';
+import { Toaster } from 'react-hot-toast';
 
 export const metadata = {
   title: 'Kalnaf Coresys SaaS',
@@ -19,6 +20,7 @@ export default function RootLayout({
         <Providers>
           {children}
           <HelpCenterButton />
+          <Toaster position="top-center" />
         </Providers>
       </body>
     </html>

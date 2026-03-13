@@ -1,13 +1,4 @@
 import axiosInstance from '@/lib/axios';
-import axios from 'axios';
-
-const API_BASE_URL = 'https://kalnaf-coresys.vercel.app/api';
-
-// Konfigurasi default axios untuk kredensial (cookie)
-const authApi = axios.create({
-  baseURL: API_BASE_URL,
-  withCredentials: true,
-});
 
 export const authService = {
   async login(credentials: any) {
@@ -22,11 +13,29 @@ export const authService = {
 
   async logout() {
     try {
-      const response = await authApi.post('/auth/logout');
+      const response = await axiosInstance.post('/auth/logout');
       return response.data;
     } catch (error: any) {
       // Lempar error agar bisa ditangani di komponen UI
       throw error.response?.data || new Error('Gagal logout');
+    }
+  },
+
+  async verifyOtp(payload: { email: string; otp: string }) {
+    try {
+      const { data } = await axiosInstance.post('/auth/verify-otp', payload);
+      return data;
+    } catch (error: any) {
+      throw error.response?.data || new Error('Verifikasi gagal');
+    }
+  },
+
+  async resendOtp(email: string) {
+    try {
+      const { data } = await axiosInstance.post('/auth/resend-otp', { email });
+      return data;
+    } catch (error: any) {
+      throw error.response?.data || new Error('Gagal mengirim ulang OTP');
     }
   },
 };
